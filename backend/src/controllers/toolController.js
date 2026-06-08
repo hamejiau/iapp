@@ -23,26 +23,32 @@ const seedDatabase = async () => {
 exports.recommendTools = async (req, res) => {
   try {
     const { role, useCase, pricing } = req.body;
+    console.log("[DEBUG] Filtros recibidos:", { role, useCase, pricing });
+
     const query = {};
     
-    // Construcción dinámica de filtros
-    if (role) query.targetRoles = { $in: [role] };
-    if (useCase) query.useCases = { $in: [useCase] };
+    // Construcción dinámica de filtros (Búsqueda exacta)
+    if (role && role !== "") query.targetRoles = role;
+    if (useCase && useCase !== "") query.useCases = useCase;
     if (pricing && pricing !== 'Todos') query.pricingModel = pricing;
+
+    console.log("[DEBUG] Query Mongoose:", JSON.stringify(query));
 
     let tools = [];
     
     if (Object.keys(query).length > 0) {
-      // Búsqueda estricta ($and implícito en Mongoose)
-      tools = await AITool.find(query);
+      // Búsqueda estricta: debe cumplir todos los filtros seleccionados
+      tools = await AITool.find(query).sort({ securityRating: -1 });
+      console.log(`[DEBUG] Resultados exactos encontrados: ${tools.length}`);
       
       // Si no hay resultados exactos, fallback a búsqueda flexible ($or)
       if(tools.length === 0) {
+          console.log("[DEBUG] No hay matches exactos, intentando búsqueda flexible...");
           const fallbackConditions = Object.entries(query).map(([key, value]) => ({ [key]: value }));
           tools = await AITool.find({ $or: fallbackConditions }).sort({ securityRating: -1 });
       }
     } else {
-      tools = await AITool.find({});
+      tools = await AITool.find({}).limit(10);
     }
 
     res.status(200).json({ success: true, count: tools.length, data: tools });

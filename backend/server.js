@@ -10,6 +10,7 @@ const app = express();
 // Función para inicializar la aplicación de forma segura
 const startServer = async () => {
   try {
+    console.log("[INFO] Intentando conectar a la base de datos...");
     await connectDB();
     await seedDatabase();
     
@@ -21,8 +22,18 @@ const startServer = async () => {
   }
 };
 
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*', // Permite fallback si la variable no está configurada
+  methods: ['GET', 'POST']
+}));
+
 app.use(express.json());
+
+// Log de peticiones para depuración en Render
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
 
 app.use('/api/tools', toolRoutes);
 

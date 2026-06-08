@@ -29,9 +29,10 @@ function App() {
       setTimeout(() => {
         setResults(response.data.data);
         setLoading(false);
-      }, 800); 
+      }, 500); 
     } catch (error) {
       console.error('Error en la petición:', error);
+      alert("Error al conectar con el servidor de IA");
       setLoading(false);
     }
   };
