@@ -3,8 +3,8 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-  // Usamos variables de entorno para la API en producción, manteniendo el fallback local
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/tools';
+  // Es mejor definir la URL base y luego concatenar el endpoint específico
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,8 +24,9 @@ function App() {
     setLoading(true);
     setSearched(true);
     try {
-      // Añadimos un timeout largo (60s) porque Render tarda en despertar
-      const response = await axios.post(`${API_BASE_URL}/recommend`, formData, {
+      // Ahora especificamos la ruta completa /api/tools/recommend
+      // Esto asegura que no falte el prefijo aunque la variable de entorno cambie
+      const response = await axios.post(`${API_BASE_URL}/api/tools/recommend`, formData, {
         timeout: 60000 
       });
       
