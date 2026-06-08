@@ -6,7 +6,7 @@ const toolRoutes = require('./src/routes/toolRoutes');
 
 const app = express();
 
-connectDB();
+// connectDB();
 
 app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
