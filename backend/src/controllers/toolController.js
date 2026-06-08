@@ -29,9 +29,13 @@ exports.recommendTools = async (req, res) => {
 
     const query = {};
     
-    // Construcción dinámica de filtros (Búsqueda exacta)
-    if (role && role !== "") query.targetRoles = role;
-    if (useCase && useCase !== "") query.useCases = useCase;
+    // Búsqueda flexible: usamos expresiones regulares para ignorar mayúsculas/minúsculas
+    if (role && role !== "") {
+      query.targetRoles = { $regex: new RegExp(`^${role}$`, 'i') };
+    }
+    if (useCase && useCase !== "") {
+      query.useCases = { $regex: new RegExp(`^${useCase}$`, 'i') };
+    }
     if (pricing && pricing !== 'Todos') query.pricingModel = pricing;
 
     console.log("[DEBUG] Query Mongoose:", JSON.stringify(query));

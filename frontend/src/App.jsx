@@ -24,15 +24,21 @@ function App() {
     setLoading(true);
     setSearched(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/recommend`, formData);
+      // Añadimos un timeout largo (60s) porque Render tarda en despertar
+      const response = await axios.post(`${API_BASE_URL}/recommend`, formData, {
+        timeout: 60000 
+      });
       
       setTimeout(() => {
         setResults(response.data.data);
         setLoading(false);
       }, 500); 
     } catch (error) {
-      console.error('Error en la petición:', error);
-      alert("Error al conectar con el servidor de IA");
+      console.error('Detalle del error:', error.response || error.message);
+      const errorMsg = error.code === 'ECONNABORTED' 
+        ? "El servidor está despertando (Render cold start). Por favor, espera 30 segundos e intenta de nuevo."
+        : "Error al conectar con el servidor de IA. Verifica que el backend esté activo.";
+      alert(errorMsg);
       setLoading(false);
     }
   };
