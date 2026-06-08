@@ -14,6 +14,8 @@ const seedDatabase = async () => {
       { name: 'Tome', description: 'Crea narrativas visuales y presentaciones ejecutivas a partir de texto.', websiteUrl: 'https://tome.app', pricingModel: 'Gratis con Límites', targetRoles: ['Docente', 'Administrativo'], useCases: ['Presentaciones'], securityRating: 4 }
     ]);
     console.info("[SISTEMA] Base de datos inicializada con herramientas de IA.");
+  } else {
+    console.info(`[SISTEMA] La base de datos ya contiene ${count} herramientas.`);
   }
 };
 
