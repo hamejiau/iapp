@@ -3,6 +3,9 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
+  // Centralizamos la URL de la API (en el futuro esto vendrá de un .env)
+  const API_BASE_URL = 'http://localhost:5000/api/tools';
+
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -21,7 +24,7 @@ function App() {
     setLoading(true);
     setSearched(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/tools/recommend', formData);
+      const response = await axios.post(`${API_BASE_URL}/recommend`, formData);
       
       setTimeout(() => {
         setResults(response.data.data);

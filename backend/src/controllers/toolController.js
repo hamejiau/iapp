@@ -13,27 +13,33 @@ const seedDatabase = async () => {
       { name: 'Tabnine', description: 'Asistente de código con IA que aprende de tu propio entorno local.', websiteUrl: 'https://www.tabnine.com', pricingModel: 'Gratis con Límites', targetRoles: ['Desarrollador'], useCases: ['Código'], securityRating: 5 },
       { name: 'Tome', description: 'Crea narrativas visuales y presentaciones ejecutivas a partir de texto.', websiteUrl: 'https://tome.app', pricingModel: 'Gratis con Límites', targetRoles: ['Docente', 'Administrativo'], useCases: ['Presentaciones'], securityRating: 4 }
     ]);
-    console.log("[SISTEMA] Base de datos actualizada con los nuevos modelos de licenciamiento.");
+    console.info("[SISTEMA] Base de datos inicializada con herramientas de IA.");
   }
 };
 
+// Es recomendable llamar a seedDatabase() desde el archivo principal de la app (ej. server.js)
+// y no dentro de un controlador que se ejecuta en cada request.
+
 exports.recommendTools = async (req, res) => {
   try {
-    await seedDatabase();
-
     const { role, useCase, pricing } = req.body;
-    let conditions = [];
+    const query = {};
     
-    if (role) conditions.push({ targetRoles: { $in: [role] } });
-    if (useCase) conditions.push({ useCases: { $in: [useCase] } });
-    if (pricing && pricing !== 'Todos') conditions.push({ pricingModel: pricing });
+    // Construcción dinámica de filtros
+    if (role) query.targetRoles = { $in: [role] };
+    if (useCase) query.useCases = { $in: [useCase] };
+    if (pricing && pricing !== 'Todos') query.pricingModel = pricing;
 
     let tools = [];
     
-    if (conditions.length > 0) {
-      tools = await AITool.find({ $and: conditions });
+    if (Object.keys(query).length > 0) {
+      // Búsqueda estricta ($and implícito en Mongoose)
+      tools = await AITool.find(query);
+      
+      // Si no hay resultados exactos, fallback a búsqueda flexible ($or)
       if(tools.length === 0) {
-          tools = await AITool.find({ $or: conditions }).sort({securityRating: -1});
+          const fallbackConditions = Object.entries(query).map(([key, value]) => ({ [key]: value }));
+          tools = await AITool.find({ $or: fallbackConditions }).sort({ securityRating: -1 });
       }
     } else {
       tools = await AITool.find({});
@@ -41,6 +47,9 @@ exports.recommendTools = async (req, res) => {
 
     res.status(200).json({ success: true, count: tools.length, data: tools });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error en el servidor', error: error.message });
+    console.error("Error en recommendTools:", error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 };
+
+exports.seedDatabase = seedDatabase; // Exportar para uso en el arranque del servidor
