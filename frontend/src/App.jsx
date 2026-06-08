@@ -3,8 +3,8 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-  // Centralizamos la URL de la API (en el futuro esto vendrá de un .env)
-  const API_BASE_URL = 'http://localhost:5000/api/tools';
+  // Usamos variables de entorno para la API en producción, manteniendo el fallback local
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/tools';
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
